@@ -1,0 +1,23 @@
+spring:
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+  data:
+    redis:
+      connect-timeout: 1s
+      timeout: 1s
+  rabbitmq:
+    connection-timeout: 3s
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
+    listener:
+      simple:
+        default-requeue-rejected: false
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 500ms
+          multiplier: 2

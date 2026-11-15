@@ -1,0 +1,18 @@
+# Build Maven e cache locale delle verifiche
+target/
+/.lab/
+*.log
+
+# Configurazioni locali degli IDE
+/.idea/
+*.iml
+/.vscode/
+
+# Variabili d'ambiente locali
+.env
+.env.*
+!.env.example
+
+# File di sistema
+.DS_Store
+Thumbs.db

@@ -1,0 +1,74 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: documents
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: demo
+    volumes:
+      - documents-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U demo -d documents"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    environment:
+      RABBITMQ_DEFAULT_USER: demo
+      RABBITMQ_DEFAULT_PASS: demo
+    ports:
+      - "127.0.0.1:15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 4s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  document-service:
+    build:
+      context: .
+      target: document
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/documents
+      SPRING_DATASOURCE_USERNAME: demo
+      SPRING_DATASOURCE_PASSWORD: demo
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_USERNAME: demo
+      SPRING_RABBITMQ_PASSWORD: demo
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_SECURITY_USER_NAME: ${DOCUMENT_API_USER:-demo}
+      SPRING_SECURITY_USER_PASSWORD: ${DOCUMENT_API_PASSWORD:-demo}
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  signature-service:
+    build:
+      context: .
+      target: signature
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_USERNAME: demo
+      SPRING_RABBITMQ_PASSWORD: demo
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+volumes:
+  documents-data:
