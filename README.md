@@ -43,6 +43,8 @@ Impostare `ID` con l’UUID restituito dalla creazione. Ripetere il GET per osse
 
 Con Java 21 eseguire `./mvnw verify` su Linux e macOS o `.\mvnw.cmd verify` su Windows. La suite copre autenticazione, REST, transizioni, cache e pubblicazione del risultato.
 
+Per eseguire anche tutti i casi del [testbook](docu/test/testbook.md), usa `./mvnw -Pcompose-it verify` su Linux e macOS o `.\mvnw.cmd -Pcompose-it verify` su Windows. Serve Docker attivo.
+
 Lo smoke test PowerShell `.\scripts\compose-smoke.ps1` usa i servizi reali. Richiede Docker attivo e le porte locali 8080 e 15672 libere. Avvia un progetto Compose temporaneo e rimuove i relativi container e volumi al termine.
 
 ## Arresto

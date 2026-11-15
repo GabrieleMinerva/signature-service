@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.UUID;
 import lab.signature.messaging.SignaturePublisher;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -36,9 +39,16 @@ class DocumentApiTest {
     @MockitoBean DocumentService documents;
     @MockitoBean SignaturePublisher publisher;
 
-    @Test
-    void requiresAuthentication() throws Exception {
-        http.perform(get(BASE)).andExpect(status().isUnauthorized());
+    @ParameterizedTest(name = "API-01 [{index}]")
+    @NullSource
+    @ValueSource(strings = "wrong-password")
+    void requiresAuthentication(String password) throws Exception {
+        var request = get(BASE);
+        if (password != null) {
+            String credentials = "demo:" + password;
+            request.header("Authorization", "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes(UTF_8)));
+        }
+        http.perform(request).andExpect(status().isUnauthorized());
     }
 
     @Test
